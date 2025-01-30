@@ -1,0 +1,33 @@
+<h1>Employee List</h1>
+
+<table border="1">
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Department</th>
+        <th>Start Date</th>
+        <th>Job Title</th>
+        <th>Salary</th>
+        <th>Actions</th>
+    </tr>
+    {{#each employees}}
+    <tr>
+        <td>{{this.firstName}}</td>
+        <td>{{this.lastName}}</td>
+        <td>{{this.department}}</td>
+        <td>{{formatDate this.startDate}}</td>
+        <td>{{this.jobTitle}}</td>
+        <td>${{this.salary}}</td>
+        <td>
+            <form action="/edit-employee/{{this._id}}" method="GET" style="display:inline;">
+                <button type="submit">Edit</button>
+            </form>
+            <form action="/delete-employee/{{this._id}}" method="POST" style="display:inline;">
+                <button type="submit" class="delete">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {{/each}}
+</table>
+
+<a href="/addEmployee">Add Employee</a>
