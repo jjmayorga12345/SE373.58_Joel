@@ -25,7 +25,7 @@ app.engine("handlebars", exphbs.engine({
     }
 }));
 app.set("view engine", "handlebars");
-app.set("views", "./views");
+app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -51,14 +51,11 @@ app.use((req, res, next) => {
     next();
 });
 
-const mongoURI = "mongodb://localhost:27017/Empl";
-mongoose.connect(mongoURI);
+const mongoURI = process.env.MONGO_URI || "mongodb+srv://joel101:joel123@employeedb.lw7av.mongodb.net/Empl?retryWrites=true&w=majority&appName=EmployeeDB";
 
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error"));
-db.once("open", () => {
-    console.log("Connected to MongoDB");
-});
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log("Connected to MongoDB Atlas"))
+    .catch(err => console.error(" MongoDB Connection Error:", err));
 
 const employeeRoutes = require("./routes/employeeRoutes");
 const authRoutes = require("./routes/auth");
