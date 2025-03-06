@@ -4,11 +4,15 @@ const bodyParser = require("body-parser");
 const exphbs = require("express-handlebars");
 const path = require("path");
 const methodOverride = require("method-override");
+const session = require("express-session");
+const passport = require("passport");
+const flash = require("connect-flash");
 
 const app = express();
 const PORT = 3000;
 
-// 1 | might error
+require("./config/passport")(passport);
+
 app.engine("handlebars", exphbs.engine({
     helpers: {
         ifEquals: function(arg1, arg2, options) {
@@ -16,7 +20,7 @@ app.engine("handlebars", exphbs.engine({
         },
         formatDate: function(date) {
             if (!date) return "";
-            return new Date(date).toISOString().split("T")[0];  // Convert to YYYY-MM-DD format
+            return new Date(date).toISOString().split("T")[0];
         }
     }
 }));
@@ -29,6 +33,24 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
+app.use(session({
+    secret: "secretKey",
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash("success_msg");
+    res.locals.error_msg = req.flash("error_msg");
+    res.locals.error = req.flash("error");
+    next();
+});
+
 const mongoURI = "mongodb://localhost:27017/Empl";
 mongoose.connect(mongoURI);
 
@@ -39,7 +61,10 @@ db.once("open", () => {
 });
 
 const employeeRoutes = require("./routes/employeeRoutes");
+const authRoutes = require("./routes/auth");
+
 app.use("/", employeeRoutes);
+app.use("/auth", authRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
